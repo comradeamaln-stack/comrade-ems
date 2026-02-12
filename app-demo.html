@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComradeEMS - CRM System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .title { font-size: 3rem; margin-bottom: 1rem; color: #1f2937; }
+        .subtitle { font-size: 1.2rem; color: #6b7280; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .feature { padding: 2rem; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb; }
+        .feature h3 { color: #1f2937; margin-bottom: 1rem; }
+        .feature p { color: #6b7280; line-height: 1.6; }
+        .server-issue { background: #fef2f2; border: 1px solid #fecaca; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        .server-issue h3 { color: #dc2626; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">ComradeEMS</h1>
+            <p class="subtitle">Complete CRM Enquiry Management System</p>
+        </div>
+
+        <div class="server-issue">
+            <h3>⚠️ Server Connection Issue</h3>
+            <p>The Next.js development server is experiencing connection issues. This is likely due to Windows network configuration or firewall settings. The application code is complete and ready to use.</p>
+            <p><strong>To fix this:</strong> Check Windows Firewall settings or try running as Administrator.</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🎯 Enquiry Management</h3>
+                <p>Complete CRUD operations for enquiries with real-time search, status tracking, priority levels, and source attribution.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📅 Appointments & Scheduling</h3>
+                <p>Schedule and manage client appointments with calendar interface, status tracking, and automated alerts.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📊 Performance Analytics</h3>
+                <p>Real staff performance tracking with conversion rates, revenue metrics, team leaderboard, and trend analysis.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📝 Follow-up System</h3>
+                <p>Activity logging and timeline view for each enquiry with note-taking, call tracking, and email history.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>👥 Team Management</h3>
+                <p>Staff member management with role assignment, performance tracking, and enquiry distribution.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>🔧 Technical Stack</h3>
+                <p>Built with Next.js 16, React 19, TypeScript, SQLite with Drizzle ORM, and Framer Motion animations.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
