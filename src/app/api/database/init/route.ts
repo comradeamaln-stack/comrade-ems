@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-// Define table schemas
-const STAFF_TABLE = 'staff';
-const COLLECTIONS_TABLE = 'collections';
+import Database from 'better-sqlite3';
+import { join } from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,69 +10,72 @@ export async function POST(request: NextRequest) {
       const body = await request.json();
       const { action } = body;
 
+      const db = new Database(join(process.cwd(), 'sqlite.db'));
+
       switch (action) {
         case 'init_database':
-          // Create tables using SQL
-          const { error } = await supabase.rpc('execute_sql', {
-            sql: `
-              -- Staff table for salesmen management
-              CREATE TABLE IF NOT EXISTS ${STAFF_TABLE} (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                name VARCHAR(255) UNIQUE NOT NULL,
-                role VARCHAR(100) DEFAULT 'collector',
-                phone VARCHAR(50),
-                email VARCHAR(255),
-                created_at TIMESTAMP DEFAULT NOW()
+          // Create tables using SQLite
+          try {
+            db.exec(`
+              CREATE TABLE IF NOT EXISTS staff (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                role TEXT DEFAULT 'collector',
+                phone TEXT,
+                email TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
               );
 
-              -- Collections table with salesman allocation
-              CREATE TABLE IF NOT EXISTS ${COLLECTIONS_TABLE} (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                customer_name VARCHAR(255) NOT NULL,
-                amount DECIMAL(12,2) NOT NULL,
-                collected_amount DECIMAL(12,2) DEFAULT 0,
-                due_date DATE NOT NULL,
-                status VARCHAR(20) DEFAULT 'pending',
-                salesmen_allocations JSONB DEFAULT '[]',
-                phone_number VARCHAR(50),
+              CREATE TABLE IF NOT EXISTS collections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                customer_name TEXT NOT NULL,
+                amount REAL NOT NULL,
+                collected_amount REAL DEFAULT 0,
+                due_date TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                phone_number TEXT,
                 address TEXT,
                 notes TEXT,
-                staff_id UUID REFERENCES ${STAFF_TABLE}(id),
-                created_at TIMESTAMP DEFAULT NOW(),
-                updated_at TIMESTAMP DEFAULT NOW()
+                staff_id INTEGER,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (staff_id) REFERENCES staff (id)
               );
-            `
-          });
+            `);
 
-          if (error) {
             return NextResponse.json({ 
-              error: 'Failed to create tables', 
+              success: true, 
+              message: 'Database structure created successfully',
+              tables: ['staff', 'collections']
+            });
+          } catch (error) {
+            return NextResponse.json({ 
+              error: 'Failed to create tables: ' + error.message, 
               status: 500 
             });
           }
 
-          return NextResponse.json({ 
-            success: true, 
-            message: 'Database structure created successfully',
-            tables: [STAFF_TABLE, COLLECTIONS_TABLE]
-          });
-
         case 'check_status':
           // Check if tables exist and get counts
-          const [staffResult, collectionsResult] = await Promise.all([
-            supabase.from(STAFF_TABLE).select('count'),
-            supabase.from(COLLECTIONS_TABLE).select('count')
-          ]);
+          try {
+            const staffCount = db.prepare('SELECT COUNT(*) as count FROM staff').get() as { count: number };
+            const collectionsCount = db.prepare('SELECT COUNT(*) as count FROM collections').get() as { count: number };
 
-          return NextResponse.json({
-            success: true,
-            status: 'Database operational',
-            tables: {
-              staff: staffResult.data?.count || 0,
-              collections: collectionsResult.data?.count || 0
-            },
-            initialized: true
-          });
+            return NextResponse.json({
+              success: true,
+              status: 'Database operational',
+              tables: {
+                staff: staffCount.count || 0,
+                collections: collectionsCount.count || 0
+              },
+              initialized: true
+            });
+          } catch (error) {
+            return NextResponse.json({ 
+              error: 'Database check failed: ' + error.message, 
+              status: 500 
+            });
+          }
 
         default:
           return NextResponse.json({ 
@@ -88,7 +83,13 @@ export async function POST(request: NextRequest) {
             status: 400 
           });
       }
-    } catch (error) {
+    } else {
+      return NextResponse.json({ 
+        error: 'Invalid content type', 
+        status: 400 
+      });
+    }
+  } catch (error) {
     console.error('Database init error:', error);
     return NextResponse.json({ 
       error: error.message, 
