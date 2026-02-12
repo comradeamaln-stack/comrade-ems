@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
             });
           } catch (error) {
             return NextResponse.json({ 
-              error: 'Failed to create tables: ' + error.message, 
+              error: 'Failed to create tables: ' + (error as Error).message, 
               status: 500 
             });
           }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
             });
           } catch (error) {
             return NextResponse.json({ 
-              error: 'Database check failed: ' + error.message, 
+              error: 'Database check failed: ' + (error as Error).message, 
               status: 500 
             });
           }
@@ -92,8 +92,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Database init error:', error);
     return NextResponse.json({ 
-      error: error.message, 
-      stack: error.stack, 
+      error: (error as Error).message, 
+      stack: (error as Error).stack, 
       status: 500 
     });
   }
